@@ -33,7 +33,8 @@ while True:
 	lc.local_compute()
 	cm.send_messages()
 	cm.wait_messages()
-	bs.barrier_sync()
-	break
+	# if the whole compute ends
+	if bs.barrier_sync():
+		break
 
 s.close()
