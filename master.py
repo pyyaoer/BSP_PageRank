@@ -1,4 +1,6 @@
 import socket
+import bsp_cm as cm
+import bsp_dg as dg
 import bsp_tr as tr
 
 port = 9000
@@ -7,8 +9,17 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host, port))
 s.listen(5)
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(('localhost', 8081))
-tr.send_file(sock, 'hehe.txt', 0)
+# divide the graph and generates the partition txt
+node_list = dg.divide_graph()
+node_list[1] = ("localhost", 8081, False)
+
+for key in node_list:
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect((node_list[key][0], node_list[key][1]))
+	tr.send_file(sock, 'hehe.txt', 0)
+
+while True:
+	if cm.wait_slaves():
+		break
 
 s.close()
