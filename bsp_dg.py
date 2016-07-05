@@ -17,16 +17,16 @@ def divide_graph(filename, nodenum):
 
 	element_degree = {}
 	for ele in from_to_dict:
-		element_degree[ele] = [len(from_to_dict[ele]), 0]
+		element_degree[ele] = [0, len(from_to_dict[ele])]
 	for ele in to_from_dict:
 		if not element_degree.has_key(ele):
-			element_degree[ele] = [0, len(to_from_dict[ele])]
+			element_degree[ele] = [len(to_from_dict[ele]), 0]
 		else:
-			element_degree[ele][1] = len(to_from_dict[ele])
+			element_degree[ele][0] = len(to_from_dict[ele])
 
 	for i in range(1, nodenum+1):
-		print i
 		f = open("task_"+str(i)+".txt", 'w')
+		f.write(str(len(element_degree)) + '\n')
 		for ele in element_degree:
 			tf = element_degree[ele]
 			f.write(str(ele) + ' ' + str(tf[0]) + ' ' + str(tf[1]) + '\n')
