@@ -90,3 +90,4 @@ ENV/
 
 # Apple computer
 .DS_Store
+*.txt
