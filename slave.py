@@ -7,7 +7,7 @@ import bsp_tr as tr
 
 Generation = 0
 KeepRuning = True
-Map = []
+Map = {}
 
 # wait for master to sync
 def sync(sock):
@@ -36,7 +36,20 @@ def save(Generation):
 
 # load the init data
 def load(FileName):
-	
+	global Map
+	f = open(FileName,"r")
+	while True:
+		line = f.readline()
+		if not line:
+			break
+		a = line.strip("\n").split(" ")
+		a0 = int(a[0])
+		print a0
+		b = a[1:]
+		print b
+		#if not Map.has_key(a0):
+		Map[a0] = []
+		Map[a0] = b
 	print "Loadding Result" , Generation
 	return
 
@@ -53,7 +66,6 @@ host = 'localhost'
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((host, port))
 s.listen(5)
-
 master_port = 9000
 master_host = "127.0.0.1"
 
@@ -63,23 +75,23 @@ DataName = "MasterInitData.txt"
 global Map
 
 # get partition infomation from master
-while True:
-	sock, addr = s.accept()
-	node_id = int(tr.get_file(sock,DataName))
-	if (node_id == 0):
-		n_list = build_adjnodes()
-		for key in n_list:
-			if not adjacent_nodes.has_key(key):
-				adjacent_nodes[key] = False
-		break
-	adjacent_nodes[node_id] = True
+#while True:
+#	sock, addr = s.accept()
+#	node_id = int(tr.get_file(sock,DataName))
+#	if (node_id == 0):
+#		n_list = build_adjnodes()
+#		for key in n_list:
+#			if not adjacent_nodes.has_key(key):
+#				adjacent_nodes[key] = False
+#		break
+#	adjacent_nodes[node_id] = True
 
-	load(DataName)
+load(DataName)
 while KeepRuning:
 	calc()
 	save(Generation)
 	report()
-	sync()
+	sync(s)
 
 
 s.close()
