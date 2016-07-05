@@ -22,8 +22,10 @@ def sync(sock):
 	while True:
 		line = f.readline()
 		a = line.strip("\n").split(" ")
+		if len(a) < 2:
+			break
 		a1 = int(a[0])
-		a2 = int(a[1])
+		a2 = float(a[1])
 		Rank[a1] = a2
 
 	Generation = Generation + 1

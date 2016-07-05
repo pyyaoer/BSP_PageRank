@@ -62,5 +62,5 @@ def divide_graph(filename, nodenum):
 		for key in to_from_dict[ele]:
 			node_adj[nd][key] = None
 
-	return node_adj
+	return len(element_degree), node_adj
 
