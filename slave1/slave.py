@@ -8,7 +8,7 @@ Map = {}
 Rank = {}
 OutRate = {}
 MyNode = {}
-delta = 0
+delta = 0.001
 node_id = 0
 
 # wait for master to sync
@@ -51,7 +51,7 @@ def calc():
 			Rank[key1] = Rank[key1] + oldRank[int(key2)] / (OutRate[int(key2)] + 0.0)
 		Rank[key1] = Rank[key1] + 0.15
 
-	for key in Rank:
+	for key in Map:
 		#print oldRank[key] , Rank[key]
 		if abs(oldRank[key] - Rank[key]) > delta:
 			anyChange = True
@@ -131,7 +131,7 @@ def reload(Generation):
 	return
 
 def final_report(sock):
-	
+	tr.send_file(sock,"",-node_id)
 	return
 
 port = int(sys.argv[1])
@@ -148,16 +148,17 @@ s.listen(5)
 sock, addr = s.accept()
 node_id = int(tr.get_file(sock,DataName))
 
-send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-send_sock.connect((master_host, master_port))
-
 load(DataName)
 while KeepRuning:
 	calc()
 	save(Generation)
+	send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	send_sock.connect((master_host, master_port))
 	report(send_sock,"Result-"+str(Generation)+".txt",node_id)
 	sync(s)
 
+send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+send_sock.connect((master_host, master_port))
 final_report(send_sock)
 s.close()
 send_sock.close()

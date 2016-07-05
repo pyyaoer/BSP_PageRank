@@ -6,6 +6,7 @@ import bsp_dg as dg
 import bsp_tr as tr
 
 ele_list = {}
+finish_list = {}
 
 node_list = {}
 node_list[1] = ("localhost", 8001)
@@ -28,15 +29,21 @@ for key in node_list:
 	tr.send_file(sock, "task_"+str(key)+".txt", key)
 	print "send task file to node "+str(key)
 
-while True:
+while node_num != 0:
 	node_report_num = 0
+	tmp_node_num = node_num
 	while node_num != node_report_num:
+		node_report_num = node_report_num + 1
 		s.listen(5)
 		sock, addr = s.accept()
 		node_id = int(tr.get_file(sock, "tmp.txt"))
+		if node_id <= 0:
+			tmp_node_num = tmp_node_num - 1
+			finish_list[-node_id] = None
+			continue
 		os.rename("tmp.txt", "report_" + str(node_id) + ".txt")
 		print "get report from node " + str(node_id)
-		node_report_num = node_report_num + 1
+	node_num = tmp_node_num
 	f = open("result.txt", 'w')
 	for key in node_list:
 		for line in fileinput.input("report_" + str(key) + ".txt"):
@@ -44,8 +51,9 @@ while True:
 			f.write(str(nd)+' '+str(pr))
 			ele_list[nd] = pr
 	f.close()
-	print "next round"
 	for key in node_list:
+		if (finish_list.has_key(key)):
+			continue
 		f = open("update_"+str(key)+".txt", 'w')
 		for ele in node_adj[key]:
 			f.write(str(ele)+' '+str(ele_list[ele]))
@@ -54,6 +62,5 @@ while True:
 		sock.connect((node_list[key][0], node_list[key][1]))
 		tr.send_file(sock, "update_"+str(key)+".txt", key)
 		print "send update file to node "+str(key)	
-
 
 s.close()
