@@ -5,6 +5,46 @@ import bsp_cm as cm
 import bsp_bs as bs
 import bsp_tr as tr
 
+Generation = 0
+KeepRuning = True
+Map = []
+
+# wait for master to sync
+def sync(sock):
+	global Generation
+	tr.get_file(sock,"Master_Data"+Generation)
+	Generation = Generation + 1
+	print "Waiting for Master to Syncornize"
+	return True
+
+# calculate rank value
+def calc():
+	anyChange = False
+
+	print "Page Ranking"
+	return
+
+# send the result to Master
+def report():
+	print "Sending Rank Data to Master"
+	return
+
+# save the calc data
+def save(Generation):
+	print "Saving Result" , Generation
+	return
+
+# load the init data
+def load(FileName):
+	
+	print "Loadding Result" , Generation
+	return
+
+# continue for a crash
+def reload(Generation):
+	print "Restoring Data From" , Generation
+	return
+
 def build_adjnodes():
 	return []
 
@@ -19,11 +59,13 @@ master_host = "127.0.0.1"
 
 # whether the adjacent node has sent the message
 adjacent_nodes = {}
+DataName = "MasterInitData.txt"
+global Map
 
 # get partition infomation from master
 while True:
 	sock, addr = s.accept()
-	node_id = int(tr.get_file(sock, "master.txt"))
+	node_id = int(tr.get_file(sock,DataName))
 	if (node_id == 0):
 		n_list = build_adjnodes()
 		for key in n_list:
@@ -32,15 +74,12 @@ while True:
 		break
 	adjacent_nodes[node_id] = True
 
+	load(DataName)
+while KeepRuning:
+	calc()
+	save(Generation)
+	report()
+	sync()
 
-while True:
-	lc.local_compute()
-	cm.send_messages()
-	cm.wait_messages()
-	# if the whole compute ends
-	if bs.barrier_sync():
-		break
-	for key in adjacent_nodes:
-		adjacent_nodes[key] = False
 
 s.close()
