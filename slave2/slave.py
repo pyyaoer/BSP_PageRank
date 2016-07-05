@@ -1,8 +1,5 @@
 import sys
 import socket
-import bsp_lc as lc
-import bsp_cm as cm
-import bsp_bs as bs
 import bsp_tr as tr
 
 Generation = 0
