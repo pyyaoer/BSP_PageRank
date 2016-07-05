@@ -8,19 +8,42 @@ import bsp_tr as tr
 Generation = 0
 KeepRuning = True
 Map = {}
-
+Rank = {}
+OutRate = {}
+delta = 0
 # wait for master to sync
 def sync(sock):
 	global Generation
-	tr.get_file(sock,"Master_Data"+Generation)
+	#tr.get_file(sock,"Master_Data"+Generation)
 	Generation = Generation + 1
 	print "Waiting for Master to Syncornize"
 	return True
 
 # calculate rank value
 def calc():
+	global Map
+	global Rank
+	global delta
+	global KeepRuning
 	anyChange = False
+	oldRank = Rank.copy()
+	for key in Rank:
+		Rank[key] = 0
+	for key1 in Map:
+		neighbor = Map[key1]
+		for key2 in neighbor:
+			Rank[key1] = Rank[key1] + oldRank[key2] / (OutRate[key2]+ 0.0)
+		Rank[key1] = Rank[key1] + 0.15
 
+	for key in Rank:
+		#print oldRank[key] , Rank[key]
+		if abs(oldRank[key] - Rank[key]) > delta:
+			anyChange = True
+			break
+
+	if not anyChange:
+		KeepRuning = False
+	print Rank
 	print "Page Ranking"
 	return
 
@@ -31,12 +54,18 @@ def report():
 
 # save the calc data
 def save(Generation):
+	global Rank
+	f.open("Result"+Generation,w)
+	for key in Rank
+		f.write(key," ",Rank[key])
+	
 	print "Saving Result" , Generation
 	return
 
 # load the init data
 def load(FileName):
 	global Map
+	global Rank
 	f = open(FileName,"r")
 	while True:
 		line = f.readline()
@@ -47,9 +76,15 @@ def load(FileName):
 		print a0
 		b = a[1:]
 		print b
-		#if not Map.has_key(a0):
+		if not Rank.has_key(a0):
+			Rank[a0] = 0
 		Map[a0] = []
 		Map[a0] = b
+		for key in b:
+				if not Rank.has_key(key):
+					Rank[key] = 0
+	f.close
+	#print Map
 	print "Loadding Result" , Generation
 	return
 
