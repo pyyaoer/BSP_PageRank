@@ -4,7 +4,6 @@ def divide_graph(filename, nodenum):
 	cnt = 0
 	from_to_dict = {}
 	to_from_dict = {}
-	node_dict = {}
 	for line in fileinput.input(filename):
 		cnt = cnt + 1
 		if cnt >= 5:
@@ -16,11 +15,28 @@ def divide_graph(filename, nodenum):
 				to_from_dict[dst] = {}
 			to_from_dict[dst][src] = None
 
+	element_degree = {}
+	for ele in from_to_dict:
+		element_degree[ele] = [len(from_to_dict[ele]), 0]
+	for ele in to_from_dict:
+		if not element_degree.has_key(ele):
+			element_degree[ele] = [0, len(to_from_dict[ele])]
+		else:
+			element_degree[ele][1] = len(to_from_dict[ele])
+
+	for i in range(1, nodenum+1):
+		print i
+		f = open("task_"+str(i)+".txt", 'w')
+		for ele in element_degree:
+			tf = element_degree[ele]
+			f.write(str(ele) + ' ' + str(tf[0]) + ' ' + str(tf[1]) + '\n')
+		f.close()
+
 	counter = 0
 	node_cnt = 1
 	eles_num = len(to_from_dict)
 	per_node = (eles_num - 1) / nodenum + 1
-	f = open("task_"+str(node_cnt)+".txt", 'w')
+	f = open("task_"+str(node_cnt)+".txt", 'aw')
 	node_dict = {}
 	for ele in to_from_dict:
 		counter = counter + 1
@@ -32,7 +48,7 @@ def divide_graph(filename, nodenum):
 		if (counter % per_node == 0) and (counter < eles_num):
 			f.close()
 			node_cnt = node_cnt + 1
-			f = open("task_"+str(node_cnt)+".txt", 'w')
+			f = open("task_"+str(node_cnt)+".txt", 'aw')
 
 	node_map = {}
 	for ele in from_to_dict:
@@ -55,5 +71,3 @@ def divide_graph(filename, nodenum):
 		f.write('\n')
 	f.close()
 
-	print "divide graph"
-	return {}
