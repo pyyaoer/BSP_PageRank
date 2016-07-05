@@ -3,13 +3,17 @@ import fileinput
 def divide_graph(filename, nodenum):
 	cnt = 0
 	from_to_dict = {}
+	to_from_dict = {}
 	for line in fileinput.input(filename):
 		cnt = cnt + 1
 		if cnt >= 5:
 			src, dst = line.strip(' \n\r').split('\t')
 			if not from_to_dict.has_key(src):
 				from_to_dict[src] = {}
-			from_to_dict[src][dst] = 1
+			from_to_dict[src][dst] = None
+			if not to_from_dict.has_key(dst):
+				to_from_dict[dst] = {}
+			to_from_dict[dst][src] = None
 	counter = 0
 	eles_num = len(from_to_dict)
 	per_node = (eles_num - 1) / nodenum + 1
