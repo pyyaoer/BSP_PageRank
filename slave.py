@@ -10,11 +10,25 @@ KeepRuning = True
 Map = {}
 Rank = {}
 OutRate = {}
+MyNode = {}
 delta = 0
+node_id = 0
+
 # wait for master to sync
 def sync(sock):
 	global Generation
-	#tr.get_file(sock,"Master_Data"+Generation)
+	s.listen(5)
+	sock, addr = s.accept()
+	tr.get_file(sock,"Master_Data"+str(Generation))
+	
+	f = open("Master_Data"+str(Generation), "r")
+	while True:
+		line = f.readline()
+		a = line.strip("\n").split(" ")
+		a1 = int(a[0])
+		a2 = int(a[1])
+		Rank[a1] = a2
+
 	Generation = Generation + 1
 	print "Waiting for Master to Syncornize"
 	return True
@@ -25,14 +39,17 @@ def calc():
 	global Rank
 	global delta
 	global KeepRuning
+	global OutRate
 	anyChange = False
 	oldRank = Rank.copy()
+	#print oldRank
 	for key in Rank:
 		Rank[key] = 0
 	for key1 in Map:
 		neighbor = Map[key1]
 		for key2 in neighbor:
-			Rank[key1] = Rank[key1] + oldRank[key2] / (OutRate[key2]+ 0.0)
+			#print oldRank[int(key2)]
+			Rank[key1] = Rank[key1] + oldRank[int(key2)] / (OutRate[int(key2)] + 0.0)
 		Rank[key1] = Rank[key1] + 0.15
 
 	for key in Rank:
@@ -43,22 +60,25 @@ def calc():
 
 	if not anyChange:
 		KeepRuning = False
-	print Rank
+	#print Rank
 	print "Page Ranking"
 	return
 
 # send the result to Master
-def report():
+def report(socket,FileName,node_id):
+	tr.send_file(socket,FileName,node_id)
 	print "Sending Rank Data to Master"
 	return
 
 # save the calc data
 def save(Generation):
+	global Map
 	global Rank
-	f.open("Result"+Generation,w)
-	for key in Rank
-		f.write(key," ",Rank[key])
-	
+	f = open("Result-"+str(Generation),"w")
+	for key in Rank:
+		if Map.has_key(key)
+		f.write(str(key)+" "+str(Rank[key])+"\n")
+	f.close()
 	print "Saving Result" , Generation
 	return
 
@@ -66,24 +86,42 @@ def save(Generation):
 def load(FileName):
 	global Map
 	global Rank
+	global OutRate
+	global MyNode
 	f = open(FileName,"r")
+	line = f.readline()
+	line = line.strip("\n")
+	count  = int(line)
+
+	while count > 0:
+		line = f.readline()
+		a = line.strip("\n").split(" ")
+		#print a
+		a1 = int(a[0])
+		a2 = int(a[2])
+		if not OutRate.has_key(a1):
+			OutRate[a1] = 0
+		if not Rank.has_key(a1):
+			Rank[a1] = 0
+		OutRate[a1] = a2
+		count = count - 1
+		
 	while True:
 		line = f.readline()
 		if not line:
 			break
 		a = line.strip("\n").split(" ")
 		a0 = int(a[0])
-		print a0
+		#print a0
 		b = a[1:]
-		print b
-		if not Rank.has_key(a0):
-			Rank[a0] = 0
+		#print b
+		MyNode[a0] = 0
 		Map[a0] = []
 		Map[a0] = b
 		for key in b:
 				if not Rank.has_key(key):
 					Rank[key] = 0
-	f.close
+	f.close()
 	#print Map
 	print "Loadding Result" , Generation
 	return
@@ -93,40 +131,34 @@ def reload(Generation):
 	print "Restoring Data From" , Generation
 	return
 
-def build_adjnodes():
-	return []
+def final_report(sock):
+	
+	return
 
 port = int(sys.argv[1])
 host = 'localhost'
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((host, port))
-s.listen(5)
 master_port = 9000
 master_host = "127.0.0.1"
 
-# whether the adjacent node has sent the message
-adjacent_nodes = {}
-DataName = "MasterInitData.txt"
-global Map
+send_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+send_sock.connect((master_host,master_port))
 
+DataName = "MasterInitData.txt"
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((host, port))
+s.listen(5)
 # get partition infomation from master
-#while True:
-#	sock, addr = s.accept()
-#	node_id = int(tr.get_file(sock,DataName))
-#	if (node_id == 0):
-#		n_list = build_adjnodes()
-#		for key in n_list:
-#			if not adjacent_nodes.has_key(key):
-#				adjacent_nodes[key] = False
-#		break
-#	adjacent_nodes[node_id] = True
+sock, addr = s.accept()
+node_id = int(tr.get_file(sock,DataName))
 
 load(DataName)
 while KeepRuning:
 	calc()
 	save(Generation)
-	report()
+	report(send_sock,"Result-"+str(Generation),node_id)
 	sync(s)
 
-
+final_report(send_sock)
 s.close()
+send_sock.close()
