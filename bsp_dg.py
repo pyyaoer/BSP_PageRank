@@ -20,24 +20,19 @@ def divide_graph(filename, nodenum):
 	eles_num = len(from_to_dict)
 	per_node = (eles_num - 1) / nodenum + 1
 	f = open("task_"+str(node_cnt)+".txt", 'w')
-	if nodenum == 1:
-		f.write(str(eles_num)+'\n')
-	else:
-		f.write(str(per_node)+'\n')
 	node_dict[node_cnt] = {}
 	for ele in from_to_dict:
 		counter = counter + 1
 		node_dict[node_cnt][ele] = None
-		f.write(ele+'\n')
+		f.write(ele)
+		for key in from_to_dict[ele]:
+			f.write(' ' + str(key))
+		f.write('\n')
 		if (counter % per_node == 0) and (counter < eles_num):
 			f.close()
 			node_cnt = node_cnt + 1
 			node_dict[node_cnt] = {}
 			f = open("task_"+str(node_cnt)+".txt", 'w')
-			if eles_num - counter < per_node:
-				f.write(str(eles_num - counter)+'\n')
-			else:
-				f.write(str(per_node)+'\n')
 	f.close()
 
 	print "divide graph"
