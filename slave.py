@@ -19,9 +19,9 @@ def sync(sock):
 	global Generation
 	s.listen(5)
 	sock, addr = s.accept()
-	tr.get_file(sock,"Master_Data"+str(Generation))
+	tr.get_file(sock,"Master_Data"+str(Generation)+".txt")
 	
-	f = open("Master_Data"+str(Generation), "r")
+	f = open("Master_Data"+str(Generation)+".txt", "r")
 	while True:
 		line = f.readline()
 		a = line.strip("\n").split(" ")
@@ -74,7 +74,7 @@ def report(socket,FileName,node_id):
 def save(Generation):
 	global Map
 	global Rank
-	f = open("Result-"+str(Generation),"w")
+	f = open("Result-"+str(Generation)+".txt","w")
 	for key in Rank:
 		if Map.has_key(key)
 		f.write(str(key)+" "+str(Rank[key])+"\n")
@@ -156,7 +156,7 @@ load(DataName)
 while KeepRuning:
 	calc()
 	save(Generation)
-	report(send_sock,"Result-"+str(Generation),node_id)
+	report(send_sock,"Result-"+str(Generation)+".txt",node_id)
 	sync(s)
 
 final_report(send_sock)
