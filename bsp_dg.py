@@ -50,7 +50,8 @@ def divide_graph(filename, nodenum):
 	for ele in node_map:
 		f.write(str(ele))
 		for key in node_map[ele]:
-			f.write(' ' + str(key))
+			if key != ele:
+				f.write(' ' + str(key))
 		f.write('\n')
 	f.close()
 
