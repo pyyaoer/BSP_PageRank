@@ -1,7 +1,6 @@
 import os
 import socket
 import fileinput
-import bsp_cm as cm
 import bsp_dg as dg
 import bsp_tr as tr
 
