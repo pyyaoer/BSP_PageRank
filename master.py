@@ -10,7 +10,7 @@ s.bind((host, port))
 s.listen(5)
 
 # divide the graph and generates the partition txt
-node_list = dg.divide_graph()
+node_list = dg.divide_graph("wiki-Vote.txt", 3)
 node_list[1] = ("localhost", 8081, False)
 
 for key in node_list:
