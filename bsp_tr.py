@@ -1,7 +1,7 @@
 import os
 import struct
 
-def get_file(sock, filename):
+def get_file_master(sock, filename):
 	FILEINFO_SIZE = struct.calcsize('iI')
 	fhead = sock.recv(FILEINFO_SIZE)
 	node_id, restsize = struct.unpack('iI', fhead)
@@ -24,12 +24,8 @@ def get_file(sock, filename):
 	fp.close()
 	return node_id
 
-def send_file(sock, filename, node_id):
+def send_file_master(sock, filename, node_id):
 	FILEINFO_SIZE = struct.calcsize('iI')
-	if node_id <= 0:
-		fhead = struct.pack('iI', node_id, 0)
-		sock.send(fhead)
-		return
 	fhead = struct.pack('iI', node_id, os.stat(filename).st_size)
 	sock.send(fhead)
 	try:
