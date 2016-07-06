@@ -44,10 +44,10 @@ for key in node_list:
 	sock.connect((node_list[key][0], node_list[key][1]))
 	if generation != 0:
 		tr.send_file_master(sock, "task_"+str(key)+".txt", -key)
-		print "recover node "+str(key)+" from generation "+str(generation)
+		print "Recovering node "+str(key)+" from generation "+str(generation)
 	else:
 		tr.send_file_master(sock, "task_"+str(key)+".txt", key)
-		print "send task file to node "+str(key)
+		print "Sending task file to node "+str(key)
 
 while node_num != 0:
 	node_report_num = 0
@@ -62,7 +62,7 @@ while node_num != 0:
 			finish_list[-node_id] = None
 			continue
 		os.rename("tmp.txt", "report_" + str(node_id) + ".txt")
-		print "get report from node " + str(node_id)
+		print "Getting report from node " + str(node_id)
 	node_num = tmp_node_num
 	f = open("result.txt", 'w')
 	for key in node_list:
@@ -71,11 +71,15 @@ while node_num != 0:
 			f.write(str(nd)+' '+str(pr))
 			ele_list[nd] = pr
 	f.close()
+
 	# checkpoint
 	f = open("tmp_meta.txt", 'w')
-	generation = generation + 1
 	f.write(str(generation))
-	f.close
+	print "Generation "+str(generation)+" saved"
+	generation = generation + 1
+	f.close()
+	os.rename("tmp_meta.txt", "metadata.txt")
+
 	for key in node_list:
 		if (finish_list.has_key(key)):
 			continue
@@ -86,6 +90,6 @@ while node_num != 0:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.connect((node_list[key][0], node_list[key][1]))
 		tr.send_file_master(sock, "update_"+str(key)+".txt", key)
-		print "send update file to node "+str(key)	
+		print "Sending update file to node "+str(key)	
 
 s.close()

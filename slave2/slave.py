@@ -127,8 +127,23 @@ def load(FileName):
 	return
 
 # continue for a crash
-def reload(Generation):
+def recover():
+	global Generation
+	global KeepRuning
+	if not os.path.isfile("Master_Data"+str(Generation)+".txt"):
+		KeepRuning = False
+		return
 	print "Restoring Data From" , Generation
+	
+	f = open("Master_Data"+str(Generation)+".txt", "r")
+	while True:
+		line = f.readline()
+		a = line.strip("\n").split(" ")
+		if len(a) < 2:
+			break
+		a1 = int(a[0])
+		a2 = float(a[1])
+		Rank[a1] = a2
 	return
 
 def final_report(sock):
@@ -152,10 +167,15 @@ if node_id <= 0:
 	node_id = -node_id
 	f = open("tmp.txt")
 	Generation = int(f.readline());
+	f.close()
+	load(DataName)
+	if Generation > 0:
+		recover()
+	print "Recovered from generation "+str(Generation)
 else:
 	os.rename("tmp.txt", DataName)
+	load(DataName)
 
-load(DataName)
 while KeepRuning:
 	calc()
 	save(Generation)
