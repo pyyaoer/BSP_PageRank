@@ -1,3 +1,4 @@
+import os
 import sys
 import socket
 import bsp_tr as tr
@@ -146,7 +147,13 @@ s.bind((host, port))
 s.listen(5)
 # get partition infomation from master
 sock, addr = s.accept()
-node_id = int(tr.get_file(sock,DataName))
+node_id = int(tr.get_file(sock,"tmp.txt"))
+if node_id <= 0:
+	node_id = -node_id
+	f = open("tmp.txt")
+	Generation = int(f.readline());
+else:
+	os.rename("tmp.txt", DataName)
 
 load(DataName)
 while KeepRuning:
